@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+replicaCount: 2
 
 clusterDomain: cluster.local
 
@@ -102,12 +102,7 @@ statefulset:
 
 persistence:
   enabled: true
-  # existingClaim:
-  size: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  labels: {}
-  annotations: {}
+  existingClaim: gitea-data-test
   # storageClass:
 
 # additional volumes to add to the Gitea statefulset.
@@ -182,7 +177,9 @@ gitea:
     #customProfileUrl:
     #customEmailUrl:
 
-  config: {}
+  config:
+    indexer:
+      ISSUE_INDEXER_TYPE: db
   #  APP_NAME: "Gitea: Git with a cup of tea"
   #  RUN_MODE: dev
   #
@@ -193,15 +190,6 @@ gitea:
   #    PASSWORD_COMPLEXITY: spec
 
   podAnnotations: {}
-
-  database:
-    builtIn:
-      postgresql:
-        enabled: true
-      mysql:
-        enabled: false
-      mariadb:
-        enabled: false
 
   cache:
     builtIn:
@@ -255,10 +243,23 @@ gitea:
   #   failureThreshold: 10
 
 memcached:
+  enabled: false
   service:
     port: 11211
 
+redis-cluster:
+  enabled: true
+  global:
+    redis:
+      password: gitea
+  cluster:
+    nodes: 6
+    replicas: 1
+  service:
+    port: 6379
+
 postgresql:
+  enabled: false
   global:
     postgresql:
       postgresqlDatabase: gitea
@@ -268,7 +269,23 @@ postgresql:
   persistence:
     size: 10Gi
 
+postgresql-ha:
+  enabled: true
+  global:
+    postgresql:
+      database: gitea
+      username: gitea
+      password: gitea
+      repmgrPassword: postgresql
+      repmgrUsername: postgresql
+      repmgrDatabase: repr
+  service:
+    port: 5432
+  persistence:
+    size: 10Gi
+
 mysql:
+  enabled: false
   root:
     password: gitea
   db:
@@ -281,6 +298,7 @@ mysql:
     size: 10Gi
 
 mariadb:
+  enabled: false
   auth:
     database: gitea
     username: gitea
