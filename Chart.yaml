@@ -38,6 +38,10 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 6.2.3
   condition: redis-cluster.enabled
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 14.6.6
+  condition: redis.enabled
 - name: mysql
   repository: https://charts.bitnami.com/bitnami
   version: 6.14.10

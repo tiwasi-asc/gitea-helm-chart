@@ -112,7 +112,27 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "redis.dns" -}}
-{{- printf "redis://%s-redis-cluster.%s.svc.%s:%g/0?pool_size=100&idle_timeout=180s" .Release.Name .Release.Namespace .Values.clusterDomain (index .Values "redis-cluster").service.port -}}
+{{- if (index .Values "redis-cluster").enabled -}}
+{{- printf "redis://:%s@%s-redis-cluster-headless.%s.svc.%s:%g/0?pool_size=100&idle_timeout=180s" (index .Values "redis-cluster").global.redis.password .Release.Name .Release.Namespace .Values.clusterDomain (index .Values "redis-cluster").service.port -}}
+{{- else if .Values.redis.enabled -}}
+{{- printf "redis://:%s@%s-redis-master.%s.svc.%s:%g/0?pool_size=100&idle_timeout=180s" .Values.redis.global.redis.password .Release.Name .Release.Namespace .Values.clusterDomain .Values.redis.master.service.port -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "redis.port" -}}
+{{- if (index .Values "redis-cluster").enabled -}}
+{{ (index .Values "redis-cluster").service.port }}
+{{- else if .Values.redis.enabled -}}
+{{ .Values.redis.master.service.port }}
+{{- end -}}
+{{- end -}}
+
+{{- define "redis.servicename" -}}
+{{- if (index .Values "redis-cluster").enabled -}}
+{{- printf "%s-redis-cluster-headless.%s.svc.%s" .Release.Name .Release.Namespace .Values.clusterDomain -}}
+{{- else if .Values.redis.enabled -}}
+{{- printf "%s-redis-master.%s.svc.%s" .Release.Name .Release.Namespace .Values.clusterDomain -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "gitea.default_domain" -}}
