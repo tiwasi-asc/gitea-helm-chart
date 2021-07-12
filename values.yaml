@@ -266,6 +266,7 @@ redis:
 
 redis-cluster:
   enabled: false
+  password: gitea
   global:
     redis:
       password: gitea
@@ -288,6 +289,11 @@ postgresql:
 
 postgresql-ha:
   enabled: false
+  postgresql:
+    password: gitea
+    repmgrPassword: gitea
+  pgpool:
+    adminPassword: gitea
   global:
     postgresql:
       database: gitea
