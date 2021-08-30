@@ -258,6 +258,8 @@ redis:
   global:
     redis:
       password: gitea
+  auth:
+    password: gitea
   master:
     service:
       port: 6379
