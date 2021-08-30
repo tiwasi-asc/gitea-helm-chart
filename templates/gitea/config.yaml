@@ -163,6 +163,9 @@ stringData:
     {{- $_ := set (index .Values.gitea.config "queue.issue_indexer") "TYPE" "redis" -}}
     {{- end -}}
 
+    {{- /* indexer */ -}}
+    {{- $_ := set .Values.gitea.config.indexer "ISSUE_INDEXER_TYPE" "db" -}}
+
     {{- /* multiple replicas */ -}}
     {{- if gt .Values.replicaCount 1.0 -}}
     {{- $_ := set .Values.gitea.config.session  "PROVIDER" "redis" -}}
