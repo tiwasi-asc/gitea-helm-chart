@@ -27,8 +27,16 @@ stringData:
     {{- $_ := set .Values.gitea.config "security" dict -}}
     {{- end -}}
 
+    {{- if not (hasKey .Values.gitea.config "session") -}}
+    {{- $_ := set .Values.gitea.config "session" dict -}}
+    {{- end -}}
+
     {{- if not (hasKey .Values.gitea.config "queue") -}}
     {{- $_ := set .Values.gitea.config "queue" dict -}}
+    {{- end -}}
+
+    {{- if not (hasKey .Values.gitea.config "queue.issue_indexer") -}}
+    {{- $_ := set .Values.gitea.config "queue.issue_indexer" dict -}}
     {{- end -}}
 
     {{- if not (hasKey .Values.gitea.config "indexer") -}}
@@ -140,7 +148,7 @@ stringData:
     {{- end -}}
 
     {{- /* cache default settings */ -}}
-    {{- if or .Values.memcached.enabled (index .Values "redis-cluster").enabled -}}
+    {{- if or .Values.memcached.enabled (index .Values "redis-cluster").enabled .Values.redis.enabled -}}
     {{- $_ := set .Values.gitea.config.cache "ENABLED" "true" -}}
     {{- $_ := set .Values.gitea.config.cache "ADAPTER" (ternary "memcache" "redis" .Values.memcached.enabled) -}}
     {{- if not (.Values.gitea.config.cache.HOST) -}}
@@ -149,11 +157,16 @@ stringData:
     {{- end -}}
 
     {{- /* redis queue */ -}}
-    {{- if (index .Values "redis-cluster").enabled -}}
+    {{- if or (index .Values "redis-cluster").enabled  .Values.redis.enabled -}}
     {{- $_ := set .Values.gitea.config.queue "TYPE" "redis" -}}
     {{- $_ := set .Values.gitea.config.queue "CONN_STR" (include "redis.dns" .) -}}
-    {{- $_ := set .Values.gitea.config.indexer "ISSUE_INDEXER_QUEUE_TYPE" "redis" -}}
-    {{- $_ := set .Values.gitea.config.indexer "ISSUE_INDEXER_QUEUE_CONN_STR" (include "redis.dns" .) -}}
+    {{- $_ := set (index .Values.gitea.config "queue.issue_indexer") "TYPE" "redis" -}}
+    {{- end -}}
+
+    {{- /* multiple replicas */ -}}
+    {{- if gt .Values.replicaCount 1.0 -}}
+    {{- $_ := set .Values.gitea.config.session  "PROVIDER" "redis" -}}
+    {{- $_ := set .Values.gitea.config.session  "PROVIDER_CONFIG" (include "redis.dns" .) -}}
     {{- end -}}
 
     {{- /* autogenerate app.ini */ -}}
